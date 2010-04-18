@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+	"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>stuckies</title>
+
+  <style type="text/css" media="screen">
+    .sticky {
+      position: absolute;
+/*      border: 1px solid red;*/
+      height: 64px;
+      width: 64px;
+      cursor: move;
+    }
+  </style>
+
+</head>
+
+<body>
+
+<div id="playpen">
+
+</div>
+
+<script type="text/javascript" charset="utf-8" src="js/prototype.js"></script>
+<script type="text/javascript" charset="utf-8" src="js/scriptaculous.js"></script>
+<script type="text/javascript" charset="utf-8">
+  
+  Math.randomInt = function(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  
+  var Stickies = {
+    colors: ["pink", "green", "yellow", "blue"],
+    ordered_notes: [],
+    edit_z_index: 10000
+  }
+  
+  var Sticky = Class.create({
+    initialize: function(x, y, color) {
+      this.element = new Element("div", {"class": "sticky"})
+      Stickies.playpen.appendChild(this.element);
+      this.index = Stickies.ordered_notes.length
+      Stickies.ordered_notes.push(this)
+      this.element.setStyle({top: y + "px", left: x + "px", zIndex: Stickies.ordered_notes.length})
+      this.element.appendChild(new Element("img", {
+        src: "images/stuckies/" + color + ".png"
+      }).setStyle({
+        display: "block",
+        height: "100%",
+        width: "100%"
+      }))
+
+      this.draggable = new Draggable(this.element, {
+        onEnd: this.put_on_top.bind(this),
+        starteffect: null,
+        endeffect: null
+      });
+      
+      this.element.observe("dblclick", function() {
+        this.toggle_edit();
+      }.bind(this))
+      
+      document.observe("sticky:edit", this.close_edit.bind(this))
+
+    },
+    
+    close_edit: function() {
+      if(this.editing) {
+        var new_left = this.element.positionedOffset().left + 96;
+        var edit_offset = this.offset(false);
+        this.element.morph({height: "64px", width: "64px", left: edit_offset.left + "px", top: edit_offset.top + "px"}, {duration: 0.25, afterFinish: function() {
+          this.put_on_top();
+        }.bind(this)})
+        this.editing = false;
+      }
+    },
+    
+    offset: function(edit) {
+      var offset = this.element.positionedOffset();
+      if(edit) {
+        return {
+          left: [offset.left - 96, 0].max(),
+          top: [offset.top - 20, 0].max()
+        }
+      }else{
+        return {
+          left: [offset.left + 96, 0].max(),
+          top: [offset.top + 20, 0].max()
+        }
+      }
+    },
+
+    toggle_edit: function() {
+      if(this.editing) {
+        this.close_edit();
+      }else{
+        this.element.fire("sticky:edit");
+        this.element.setStyle({zIndex: Stickies.edit_z_index})
+        var edit_offset = this.offset(true);
+        this.element.morph({height: "256px", width: "256px", left: edit_offset.left + "px", top: edit_offset.top + "px"}, {duration: 0.25})
+        this.editing = true;
+      }
+    },
+    
+    put_on_top: function() {
+      for(var i = this.index; i < Stickies.ordered_notes.length; i++) {
+        Stickies.ordered_notes[i].index -= 1;
+        Stickies.ordered_notes[i].element.setStyle({zIndex: i-1})
+      }
+      this.draggable.originalZ = Stickies.ordered_notes.length
+      this.index = Stickies.ordered_notes.length
+      Stickies.ordered_notes.push(this)
+    }
+  });
+  
+  
+  
+  document.observe("dom:loaded", function() {
+    Stickies.playpen = $("playpen")
+    for(var x = 0; x < 10; x++) {
+      for(var y = 0; y < 10; y++) {
+        new Sticky(x*100, y*100, Stickies.colors[Math.randomInt(0,Stickies.colors.length-1)]);
+      }
+    }
+    
+  })
+  
+
+
+</script>
+
+</body>
+</html>
