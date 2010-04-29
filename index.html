@@ -8,9 +8,17 @@
     }
     .sticky {
       position: absolute;
-      height: 64px;
-      width: 64px;
       cursor: move;
+      width: 256px;
+      height: 256px;
+      background: transparent url(images/stickies/white.png) no-repeat;
+    }
+    .sticky .content {
+      width: 200px;
+      height: 200px;
+      position: relative;
+      top: 30px;
+      left: 20px;
     }
     a#add {
       background: url(images/add.png) no-repeat;
@@ -18,10 +26,18 @@
       height: 100px;
       display: block;
       text-indent: -1000px;
-      position: absolute;
+      position: fixed;
       bottom: -10px;
       left: 5px;
       z-index: 1000;
+    }
+    #desk {
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
   </style>
 
@@ -29,10 +45,7 @@
 
 <body>
 <a id="add">Add</a>
-
-  
-
-<div id="playpen">
+<div id="desk">
 
 </div>
 
@@ -51,119 +64,35 @@
   var Sticky = function() {
     this.element = $("<div></div>")
       .addClass("sticky")
-      .append("<img src='images/stuckies/" + Sticky.COLORS[Util.randomInt(0,3)] + ".png'/>")
-      .css('transform', 'rotate(' + Util.randomInt(-10, 10) + 'deg)')
-      .css({left: Util.randomInt(0, $(window).width() - 120)})
-      .css({top: Util.randomInt(0, $(window).height() - 120)})
+      .append($("<div></div>").addClass("content"))
+      .css('transform', 'rotate(' + Util.randomInt(-20, 20) + 'deg)')
+      .css({left: Util.randomInt(-50, $("#desk").width() - 120)})
+      .css({top: Util.randomInt(-80, $("#desk").height() - 120)})
       .draggable();
-    this.element.appendTo("body");
+    this.setStyle(Sticky.COLORS[Util.randomInt(0,Sticky.COLORS.length-1)]);
+    this.element.appendTo("#desk");
+    this.setText("bla");
   }
-  Sticky.COLORS = ["pink", "green", "yellow", "blue"];
+  Sticky.COLORS = ["pink", "green", "yellow", "blue", "white"];
+  Sticky.prototype = {
+    setText: function(text) {
+      // console.log(this.element.find(".content").html(text))
+      this.element.find(".content").html(text)
+    },
+    
+    setStyle: function(stylename) {
+      console.log(this.element);
+      this.element.css('background', "url(images/stickies/" + stylename + ".png)");
+    }
+  }
   
 
   $(function() {
     $("#add").click(function() {
       new Sticky();
+      return false;
     })
   })
-</script>
-
-<!-- <script type="text/javascript" charset="utf-8" src="js/prototype.js"></script>
-<script type="text/javascript" charset="utf-8" src="js/scriptaculous.js"></script> -->
-<script type="text/javascript" charset="utf-8">
-    // 
-    // var Sticky = Class.create({
-    //   initialize: function(x, y, color) {
-    //     this.element = new Element("div", {"class": "sticky"})
-    //     Stickies.playpen.appendChild(this.element);
-    //     this.index = Stickies.ordered_notes.length
-    //     Stickies.ordered_notes.push(this)
-    //     this.element.setStyle({top: y + "px", left: x + "px", zIndex: Stickies.ordered_notes.length})
-    //     this.element.appendChild(new Element("img", {
-    //       src: "images/stuckies/" + color + ".png"
-    //     }).setStyle({
-    //       display: "block",
-    //       height: "100%",
-    //       width: "100%"
-    //     }))
-    // 
-    //     this.draggable = new Draggable(this.element, {
-    //       onEnd: this.put_on_top.bind(this),
-    //       starteffect: null,
-    //       endeffect: null
-    //     });
-    //     
-    //     this.element.observe("dblclick", function() {
-    //       this.toggle_edit();
-    //     }.bind(this))
-    //     
-    //     document.observe("sticky:edit", this.close_edit.bind(this))
-    // 
-    //   },
-    //   
-    //   close_edit: function() {
-    //     if(this.editing) {
-    //       var new_left = this.element.positionedOffset().left + 96;
-    //       var edit_offset = this.offset(false);
-    //       this.element.morph({height: "64px", width: "64px", left: edit_offset.left + "px", top: edit_offset.top + "px"}, {duration: 0.25, afterFinish: function() {
-    //         this.put_on_top();
-    //       }.bind(this)})
-    //       this.editing = false;
-    //     }
-    //   },
-    //   
-    //   offset: function(edit) {
-    //     var offset = this.element.positionedOffset();
-    //     if(edit) {
-    //       return {
-    //         left: [offset.left - 96, 0].max(),
-    //         top: [offset.top - 20, 0].max()
-    //       }
-    //     }else{
-    //       return {
-    //         left: [offset.left + 96, 0].max(),
-    //         top: [offset.top + 20, 0].max()
-    //       }
-    //     }
-    //   },
-    // 
-    //   toggle_edit: function() {
-    //     if(this.editing) {
-    //       this.close_edit();
-    //     }else{
-    //       this.element.fire("sticky:edit");
-    //       this.element.setStyle({zIndex: Stickies.edit_z_index})
-    //       var edit_offset = this.offset(true);
-    //       this.element.morph({height: "256px", width: "256px", left: edit_offset.left + "px", top: edit_offset.top + "px"}, {duration: 0.25})
-    //       this.editing = true;
-    //     }
-    //   },
-    //   
-    //   put_on_top: function() {
-    //     for(var i = this.index; i < Stickies.ordered_notes.length; i++) {
-    //       Stickies.ordered_notes[i].index -= 1;
-    //       Stickies.ordered_notes[i].element.setStyle({zIndex: i-1})
-    //     }
-    //     this.draggable.originalZ = Stickies.ordered_notes.length
-    //     this.index = Stickies.ordered_notes.length
-    //     Stickies.ordered_notes.push(this)
-    //   }
-    // });
-    // 
-    // 
-    // 
-    // document.observe("dom:loaded", function() {
-    //   Stickies.playpen = $("playpen")
-    //   for(var x = 0; x < 10; x++) {
-    //     for(var y = 0; y < 10; y++) {
-    //       new Sticky(x*100, y*100, Stickies.colors[Math.randomInt(0,Stickies.colors.length-1)]);
-    //     }
-    //   }
-    //   
-    // })
-    // 
-    // 
-  
 </script>
 
 </body>
