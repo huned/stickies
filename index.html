@@ -51,7 +51,7 @@
   var Sticky = function() {
     this.element = $("<div></div>")
       .addClass("sticky")
-      .append("<img src='images/stuckies/" + Sticky.COLORS[Util.randomInt(0,4)] + ".png'/>")
+      .append("<img src='images/stuckies/" + Sticky.COLORS[Util.randomInt(0,3)] + ".png'/>")
       .css('transform', 'rotate(' + Util.randomInt(-10, 10) + 'deg)')
       .css({left: Util.randomInt(0, $(window).width() - 120)})
       .css({top: Util.randomInt(0, $(window).height() - 120)})
