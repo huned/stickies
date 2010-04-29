@@ -21,6 +21,7 @@
       position: absolute;
       bottom: -10px;
       left: 5px;
+      z-index: 1000;
     }
   </style>
 
@@ -36,20 +37,31 @@
 </div>
 
 <script type="text/javascript" charset="utf-8" src="js/modernizr-1.1.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="js/jquery-ui-1.8.custom.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="js/jquery-css-transform.js"></script>
 <script src="http://www.google.com/jsapi"></script>
 <script type="text/javascript" charset="utf-8">
-  google.load("jquery", "1.4.2");
-  google.load("jqueryui", "1.8.1");
 
+  Util = {
+    randomInt: function(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+  }
   var Sticky = function() {
     this.element = $("<div></div>")
       .addClass("sticky")
-      .append("<img src='images/stuckies/yellow.png'/>")
+      .append("<img src='images/stuckies/" + Sticky.COLORS[Util.randomInt(0,4)] + ".png'/>")
+      .css('transform', 'rotate(' + Util.randomInt(-10, 10) + 'deg)')
+      .css({left: Util.randomInt(0, $(window).width() - 120)})
+      .css({top: Util.randomInt(0, $(window).height() - 120)})
       .draggable();
     this.element.appendTo("body");
   }
+  Sticky.COLORS = ["pink", "green", "yellow", "blue"];
+  
 
-  google.setOnLoadCallback(function() {
+  $(function() {
     $("#add").click(function() {
       new Sticky();
     })
@@ -59,16 +71,6 @@
 <!-- <script type="text/javascript" charset="utf-8" src="js/prototype.js"></script>
 <script type="text/javascript" charset="utf-8" src="js/scriptaculous.js"></script> -->
 <script type="text/javascript" charset="utf-8">
-  
-  Math.randomInt = function(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-  
-  var stickies = {
-    colors: ["pink", "green", "yellow", "blue"],
-    ordered_notes: [],
-    edit_z_index: 10000
-  }
     // 
     // var Sticky = Class.create({
     //   initialize: function(x, y, color) {
