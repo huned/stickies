@@ -19,6 +19,9 @@
       position: relative;
       top: 30px;
       left: 20px;
+      border: none;
+      background: transparent;
+      font-family: Georgia;
     }
     a#add {
       background: url(images/add.png) no-repeat;
@@ -53,7 +56,8 @@
 <script type="text/javascript" charset="utf-8" src="js/jquery-1.4.2.min.js"></script>
 <script type="text/javascript" charset="utf-8" src="js/jquery-ui-1.8.custom.min.js"></script>
 <script type="text/javascript" charset="utf-8" src="js/jquery-css-transform.js"></script>
-<script src="http://www.google.com/jsapi"></script>
+<script type="text/javascript" charset="utf-8" src="js/jquery-animate-css-rotate-scale.js"></script>
+
 <script type="text/javascript" charset="utf-8">
 
   Util = {
@@ -61,27 +65,71 @@
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
   }
-  var Sticky = function() {
+  var Sticky = function(text) {
     this.element = $("<div></div>")
       .addClass("sticky")
-      .append($("<div></div>").addClass("content"))
-      .css('transform', 'rotate(' + Util.randomInt(-20, 20) + 'deg)')
-      .css({left: Util.randomInt(-50, $("#desk").width() - 120)})
-      .css({top: Util.randomInt(-80, $("#desk").height() - 120)})
+      .css({left: $("#desk").width()/2, top: 0, opacity: 0})
+      .css({left: ($("#desk").width() - 100) / 2,
+            top: ($("#desk").height() - 100) / 2 })
+      .css('transform', 'scale(0.3)')
+      .appendTo("#desk")
       .draggable();
+    var sticky = this;
+    var content = $("<textarea>" + text + "</textarea>")
+      .addClass("content")
+      .bind("blur", function() {
+        sticky.stopEditing();
+      });
+    this.element.append(content)
+    this.element.click(function() {
+      sticky.startEditing();
+    })
+
+    this.startEditing();
+      // .css({top: Util.randomInt(-80, $("#desk").height() - 120)})
     this.setStyle(Sticky.COLORS[Util.randomInt(0,Sticky.COLORS.length-1)]);
-    this.element.appendTo("#desk");
-    this.setText("bla");
   }
   Sticky.COLORS = ["pink", "green", "yellow", "blue", "white"];
   Sticky.prototype = {
+    startEditing: function() {
+      if(!this.editing) {
+        this.editing = true;
+        this.element
+          .animate({scale: 2,
+                    opacity: 100,
+                    left: ($("#desk").width() - this.element.width() - 100) / 2,
+                    top: ($("#desk").height() - this.element.height() - 100) / 2 }, 100)
+                                    // top: Util.randomInt(-80, $("#desk").height() - 120)}, 300)
+          .css('transform', 'rotate(' + Util.randomInt(-5, 5) + 'deg)')
+        this.element.find(".content").removeAttr("readonly").select()
+      }
+    },
+    
+    stopEditing: function() {
+      if(this.editing) {
+        this.editing = false;
+        this.element
+          .animate({scale: 1,
+                    left: ($("#desk").width() - this.element.width() - 100) / 2,
+                    top: ($("#desk").height() - this.element.height() - 100) / 2 }, 100)
+                                    // top: Util.randomInt(-80, $("#desk").height() - 120)}, 300)
+          .css('transform', 'rotate(' + Util.randomInt(-5, 5) + 'deg)')
+          .find(".content")
+            .attr("readonly", "true")
+        }
+    },
+    
+    setPosition: function() {
+      
+    },
+    
     setText: function(text) {
       // console.log(this.element.find(".content").html(text))
-      this.element.find(".content").html(text)
+      this.element.find(".content").html(text).focus()
     },
     
     setStyle: function(stylename) {
-      console.log(this.element);
+      // console.log(this.element);
       this.element.css('background', "url(images/stickies/" + stylename + ".png)");
     }
   }
@@ -90,6 +138,19 @@
   $(function() {
     $("#add").click(function() {
       new Sticky();
+      return false;
+    })
+
+    $("#desk").bind("drop", function(event) {
+      event.originalEvent.preventDefault();
+      var data = event.originalEvent.dataTransfer;
+      for (var i = 0; i < data.files.length; i++) {
+        var file = data.files.item(i);
+        new Sticky(file.getAsText("utf-8"));
+      }
+      return false;
+    }).bind("dragover", function(event) {
+      event.originalEvent.preventDefault();
       return false;
     })
   })
